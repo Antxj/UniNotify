@@ -63,14 +63,11 @@ Your mail itself is never synced. On a new computer, just sign in to your webmai
 
 ## Install
 
-**Firefox Add-ons:** coming soon.
+<a href="https://addons.mozilla.org/firefox/addon/uninotify/"><img src="https://img.shields.io/badge/Get_it_on-Firefox_Add--ons-ff7139?logo=firefoxbrowser&logoColor=white&style=for-the-badge" alt="Get UniNotify on Firefox Add-ons" height="40"></a>
 
-**Manual install (for testing):**
-1. Download the latest `.zip` from the [Releases](https://github.com/Antxj/UniNotify/releases) page.
-2. In Firefox, open `about:debugging#/runtime/this-firefox`.
-3. Click **Load Temporary Add-on…** and select the downloaded file.
+Install it from **[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/uninotify/)**. It installs permanently and updates itself.
 
-> Temporary add-ons are removed when Firefox restarts. The Firefox Add-ons version installs permanently and updates itself.
+> UniNotify was just submitted and is waiting for Mozilla's review. The link will work as soon as it's approved.
 
 ## Getting started
 
