@@ -111,6 +111,8 @@ input[type="color"] {
 .acc .toggles .switch::after { width: 12px; height: 12px; }
 .acc .toggles .switch:checked::after { transform: translateX(14px); }
 
+.acc-actions { border-top: 1px solid var(--border); padding: 10px 14px; background: var(--bg-sub); }
+
 .privacy ul { margin: 8px 0 0; padding-left: 20px; color: var(--muted); }
 .privacy li { margin: 6px 0; }
 

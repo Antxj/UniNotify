@@ -60,14 +60,18 @@
   },
 
   async checkSession(uid, appVersion, signal) {
-    const [user, counts, list] = await Promise.all([
+    const [user, mailSettings, counts, list] = await Promise.all([
       this.api("/core/v4/users", uid, appVersion, signal),
+      this.api("/mail/v4/settings", uid, appVersion, signal),
       this.api("/mail/v4/messages/count", uid, appVersion, signal),
       this.api(`/mail/v4/messages?LabelID=${this.INBOX}&Unread=1&Page=0&PageSize=20&Sort=Time&Desc=1`, uid, appVersion, signal)
     ]);
 
     const email = user.User?.Email || user.User?.Name || uid;
     const inbox = (counts.Counts || []).find((c) => c.LabelID === this.INBOX);
+    // Proton groups mail into conversations by default (ViewMode 0); its URLs
+    // then use the conversation id, not the message id.
+    const byConversation = mailSettings.MailSettings?.ViewMode !== 1;
     const messages = (list.Messages || []).map((m) => ({
       id: m.ID,
       from: m.Sender?.Name || m.Sender?.Address || "",
@@ -75,12 +79,13 @@
       subject: m.Subject || "",
       snippet: "",
       time: (m.Time || 0) * 1000,
-      url: `https://mail.proton.me/inbox/${encodeURIComponent(m.ID)}`
+      url: `https://mail.proton.me/inbox/${encodeURIComponent(byConversation && m.ConversationID ? m.ConversationID : m.ID)}`
     }));
 
     return {
       id: `proton:${email.toLowerCase()}`,
       provider: "proton",
+      uid, // used to open links in the right signed-in account (/u/<n>/)
       email,
       name: user.User?.DisplayName || "",
       unread: inbox ? inbox.Unread : messages.length,

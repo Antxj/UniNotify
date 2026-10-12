@@ -151,8 +151,18 @@ async function openMail({ accountId, url }) {
   const providerId = acc?.provider || String(accountId).split(":")[0];
   if (!UN.PROVIDERS[providerId]) return;
 
-  const target = url ? UN.safeUrl(url, providerId) : acc?.inboxUrl || UN.PROVIDERS[providerId].inboxUrl;
-  const base = tabBase(acc, providerId);
+  let target = url ? UN.safeUrl(url, providerId) : acc?.inboxUrl || UN.PROVIDERS[providerId].inboxUrl;
+  let base = tabBase(acc, providerId);
+
+  // Proton: address the right account with /u/<n>/, learned from its web app.
+  if (providerId === "proton" && acc?.uid) {
+    const { protonLocalIds = {} } = await browser.storage.local.get("protonLocalIds");
+    const n = protonLocalIds[acc.uid];
+    if (Number.isInteger(n)) {
+      base = `https://mail.proton.me/u/${n}/`;
+      target = target.replace(/^https:\/\/mail\.proton\.me\/(u\/\d+\/)?/, base);
+    }
+  }
   let tab = null;
   try {
     const tabs = await browser.tabs.query({ url: UN.PROVIDERS[providerId].origins });
@@ -169,16 +179,41 @@ async function openMail({ accountId, url }) {
   setTimeout(checkAll, 15000);
 }
 
+// ---------- Proton account mapping ----------
+
+// The helper script runs only while Proton is turned on and permitted.
+async function syncProtonScript() {
+  const id = "proton-sessions";
+  const settings = await UN.getSettings();
+  const wanted = settings.providers.proton && (await UN.hasProviderPermission("proton"));
+  const existing = await browser.scripting.getRegisteredContentScripts({ ids: [id] });
+  if (!wanted) {
+    if (existing.length) await browser.scripting.unregisterContentScripts({ ids: [id] });
+    return;
+  }
+  if (!existing.length) {
+    await browser.scripting.registerContentScripts([
+      { id, matches: ["https://mail.proton.me/*"], js: ["content/proton-sessions.js"], runAt: "document_idle", persistAcrossSessions: true }
+    ]);
+  }
+  // Also cover Proton tabs that were already open.
+  for (const tab of await browser.tabs.query({ url: "https://mail.proton.me/*" })) {
+    browser.scripting.executeScript({ target: { tabId: tab.id }, files: ["content/proton-sessions.js"] }).catch(() => {});
+  }
+}
+
 // ---------- events ----------
 
 browser.runtime.onInstalled.addListener(async ({ reason }) => {
   await ensureAlarm();
   if (reason === "install") browser.runtime.openOptionsPage();
+  syncProtonScript();
   checkAll();
 });
 
 browser.runtime.onStartup.addListener(async () => {
   await ensureAlarm();
+  syncProtonScript();
   checkAll();
 });
 
@@ -190,6 +225,14 @@ browser.runtime.onMessage.addListener((msg, sender) => {
   // Only accept messages from our own pages.
   if (sender.id !== browser.runtime.id) return;
   if (msg?.type === "check") return checkAll();
+  if (msg?.type === "protonSessions") {
+    if (!sender.url?.startsWith("https://mail.proton.me/")) return;
+    const map = {};
+    for (const [uid, n] of Object.entries(msg.map || {})) {
+      if (/^[\w-]{1,128}$/.test(uid) && Number.isInteger(n) && n >= 0) map[uid] = n;
+    }
+    return browser.storage.local.set({ protonLocalIds: map });
+  }
   if (msg?.type === "open") return openMail(msg);
 });
 
@@ -204,12 +247,21 @@ browser.storage.onChanged.addListener((changes, area) => {
   const before = changes.settings.oldValue || {};
   const after = changes.settings.newValue || {};
   ensureAlarm();
-  if (JSON.stringify(before.providers) !== JSON.stringify(after.providers)) checkAll();
+  if (JSON.stringify(before.providers) !== JSON.stringify(after.providers)) {
+    syncProtonScript();
+    checkAll();
+  }
   else updateBadge();
 });
 
-browser.permissions.onAdded.addListener(() => checkAll());
-browser.permissions.onRemoved.addListener(() => checkAll());
+browser.permissions.onAdded.addListener(() => {
+  syncProtonScript();
+  checkAll();
+});
+browser.permissions.onRemoved.addListener(() => {
+  syncProtonScript();
+  checkAll();
+});
 
 // When a webmail tab's title changes (e.g. "Inbox (3)"), the unread count most
 // likely changed too. Refresh soon after, debounced.

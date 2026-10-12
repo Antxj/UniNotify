@@ -1,89 +1,75 @@
 "use strict";
-// Outlook.com / Hotmail / Live: both brands run on outlook.live.com. We ask the
-// web app's own bootstrap endpoint (the one the page calls on load) for the
-// inbox folder and the first page of conversations, using the open session.
+// Outlook.com / Hotmail / Live via Microsoft's official Graph API. Each account
+// is connected once with Microsoft's own sign-in page (see lib/msauth.js).
 
 (UN.impl = UN.impl || {}).outlook = {
+  GRAPH: "https://graph.microsoft.com/v1.0/me/mailFolders/inbox",
+
   async check(signal) {
+    const emails = Object.keys(await UN.ms.accounts());
+    if (!emails.length) throw UN.providerError("signed_out", "no account connected");
+
+    const results = await Promise.allSettled(emails.map((email) => this.checkAccount(email, signal)));
+    const accounts = [];
+    let lastError = null;
+    results.forEach((r, i) => {
+      if (r.status === "fulfilled") accounts.push(r.value);
+      else if (r.reason?.name === "AbortError") throw r.reason;
+      else {
+        lastError = r.reason;
+        // Keep the account visible so the user can see it needs reconnecting.
+        accounts.push({ id: `outlook:${emails[i]}`, provider: "outlook", email: emails[i], unread: 0, messages: [],
+          inboxUrl: UN.PROVIDERS.outlook.inboxUrl, error: r.reason?.code || "unexpected" });
+      }
+    });
+    if (!accounts.some((a) => !a.error)) throw lastError || UN.providerError("signed_out");
+    return accounts;
+  },
+
+  async graph(path, token, signal) {
     let res;
     try {
-      res = await fetch("https://outlook.live.com/owa/0/sessiondata.ashx?app=Mail", {
-        method: "POST",
-        credentials: "include",
+      res = await fetch(this.GRAPH + path, {
+        credentials: "omit",
         cache: "no-store",
-        headers: { "x-req-source": "Mail" },
+        headers: { authorization: `Bearer ${token}` },
         signal
       });
     } catch (e) {
-      // Signed out: the redirect to login.live.com is blocked by our CSP.
       if (e.name === "AbortError") throw e;
-      throw UN.providerError("signed_out");
+      throw UN.providerError("network");
     }
-    if (res.status === 401 || res.status === 440 || res.redirected) throw UN.providerError("signed_out");
+    if (res.status === 401) throw UN.providerError("signed_out");
     if (!res.ok) throw UN.providerError("network", `HTTP ${res.status}`);
+    return res.json();
+  },
 
-    let data;
-    try {
-      data = await res.json();
-    } catch (_) {
-      throw UN.providerError("signed_out");
-    }
+  async checkAccount(email, signal) {
+    const token = await UN.ms.accessToken(email);
+    const select = "$select=id,subject,from,receivedDateTime,webLink";
+    const [folder, list] = await Promise.all([
+      this.graph("?$select=unreadItemCount", token, signal),
+      this.graph(`/messages?$filter=isRead%20eq%20false&$top=20&${select}`, token, signal)
+    ]);
 
-    const inbox = this.find(data, (o) => o.DistinguishedFolderId === "inbox" && typeof o.UnreadCount === "number");
-    if (!inbox) throw UN.providerError("unexpected", "inbox folder not found");
-
-    const email = this.findValue(data, ["UserEmailAddress", "LogonEmailAddress"]) || "";
-    const name = this.findValue(data, ["UserDisplayName"]) || "";
-
-    const conversations = [];
-    this.walk(data, (o) => {
-      if (typeof o.ConversationTopic === "string" && o.UnreadCount > 0 && o.ConversationId?.Id) conversations.push(o);
-    });
-
-    const messages = conversations.slice(0, 20).map((c) => {
-      const sender = (Array.isArray(c.UniqueSenders) && c.UniqueSenders[0]) || c.From?.Mailbox?.Name || "";
-      return {
-        id: c.ConversationId.Id,
-        from: String(sender),
-        subject: c.ConversationTopic,
-        snippet: typeof c.Preview === "string" ? c.Preview : "",
-        time: Date.parse(c.LastDeliveryTime) || 0,
-        url: `https://outlook.live.com/mail/0/inbox/id/${encodeURIComponent(c.ConversationId.Id)}`
-      };
-    });
+    const messages = (list.value || []).map((m) => ({
+      id: m.id,
+      from: m.from?.emailAddress?.name || m.from?.emailAddress?.address || "",
+      fromEmail: m.from?.emailAddress?.address || "",
+      subject: m.subject || "",
+      snippet: "",
+      time: Date.parse(m.receivedDateTime) || 0,
+      url: UN.safeUrl(m.webLink || "", "outlook")
+    }));
     messages.sort((a, b) => b.time - a.time);
 
-    const key = (email || name || "default").toLowerCase();
-    return [
-      {
-        id: `outlook:${key}`,
-        provider: "outlook",
-        email,
-        name,
-        unread: inbox.UnreadCount,
-        messages,
-        inboxUrl: UN.PROVIDERS.outlook.inboxUrl
-      }
-    ];
-  },
-
-  // Depth-first walk over the (large, loosely documented) JSON payload.
-  walk(node, visit, depth = 0) {
-    if (!node || typeof node !== "object" || depth > 40) return;
-    if (!Array.isArray(node)) visit(node);
-    for (const v of Object.values(node)) if (v && typeof v === "object") this.walk(v, visit, depth + 1);
-  },
-
-  find(node, pred) {
-    let hit = null;
-    this.walk(node, (o) => {
-      if (!hit && pred(o)) hit = o;
-    });
-    return hit;
-  },
-
-  findValue(node, keys) {
-    const o = this.find(node, (x) => keys.some((k) => typeof x[k] === "string" && x[k]));
-    return o ? keys.map((k) => o[k]).find((v) => typeof v === "string" && v) : null;
+    return {
+      id: `outlook:${email}`,
+      provider: "outlook",
+      email,
+      unread: folder.unreadItemCount || 0,
+      messages,
+      inboxUrl: UN.PROVIDERS.outlook.inboxUrl
+    };
   }
 };

@@ -49,6 +49,20 @@
       </div>
 
       <div class="row">
+        <label for="listCount" data-i18n="listCount"></label>
+        <select id="listCount">
+          <option value="0" data-i18n="listNone"></option>
+          <option value="3">3</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="listSubject" data-i18n="listSubject"></label>
+        <input type="checkbox" class="switch" id="listSubject">
+      </div>
+
+      <div class="row">
         <label for="notify" data-i18n="notify"></label>
         <input type="checkbox" class="switch" id="notify">
       </div>
@@ -91,6 +105,7 @@
   </div>
   <div id="toast" role="status"></div>
   <script src="../lib/common.js"></script>
+  <script src="../lib/msauth.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

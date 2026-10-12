@@ -154,5 +154,44 @@
   },
   "sourceCode": {
     "message": "Código aberto no GitHub"
+  },
+  "listCount": {
+    "message": "E-mails listados por conta no popup"
+  },
+  "listNone": {
+    "message": "Nenhum (só a contagem)"
+  },
+  "listSubject": {
+    "message": "Mostrar assuntos no popup"
+  },
+  "showDetails": {
+    "message": "Mostrar e-mails"
+  },
+  "hideDetails": {
+    "message": "Ocultar e-mails (só contagem)"
+  },
+  "msConnect": {
+    "message": "+ Conectar uma conta Outlook"
+  },
+  "msConnectShort": {
+    "message": "Conectar"
+  },
+  "msConnected": {
+    "message": "$1 conectado"
+  },
+  "msConnectFailed": {
+    "message": "O login da Microsoft não foi concluído"
+  },
+  "msNoAccount": {
+    "message": "Nenhuma conta conectada ainda"
+  },
+  "msReconnect": {
+    "message": "Reconectar"
+  },
+  "msReconnectNeeded": {
+    "message": "Uma conta precisa ser reconectada"
+  },
+  "msDisconnect": {
+    "message": "Desconectar"
   }
 }

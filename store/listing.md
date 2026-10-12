@@ -54,8 +54,8 @@ Mozilla Public License 2.0
 
 ## Notes to reviewer
 No build step and no third-party code; the submitted files are the source.
-To test: enable a provider in the options page, then sign in to that webmail in Firefox.
-Gmail uses the official Atom feed (mail.google.com/mail/u/N/feed/atom). Outlook uses outlook.live.com/owa/0/sessiondata.ashx. Proton uses the mail.proton.me/api endpoints of its web app, identified by the AUTH-<uid> cookie name.
+To test: enable a provider in the options page, then sign in to that webmail in Firefox (Gmail, Proton) or click "Connect an Outlook account" (Outlook, Microsoft OAuth 2.0 + PKCE, scope Mail.ReadBasic).
+Gmail uses the official Atom feed (mail.google.com/mail/u/N/feed/atom). Outlook uses the official Microsoft Graph API (graph.microsoft.com) with tokens from login.microsoftonline.com via browser.identity.launchWebAuthFlow. Proton uses the mail.proton.me/api endpoints of its web app, identified by the AUTH-<uid> cookie name.
 
 ## Assets
 - Icon: store/icons/icon-128.png

@@ -1,6 +1,5 @@
 "use strict";
 const { h, t, svg, ICONS, PROVIDERS } = UN;
-const MAX_MSGS = 5;
 const app = document.getElementById("app");
 let settings = null;
 let state = null;
@@ -22,12 +21,16 @@ function errorText(code) {
 
 function renderHeader(total) {
   const refresh = h("button", { class: "icon-btn" + (state.checking ? " spinning" : ""), title: t("refresh"), "aria-label": t("refresh"), onclick: refreshNow }, svg(ICONS.refresh));
+  const shown = settings.showDetails !== false;
+  const eye = h("button", { class: "icon-btn", title: t(shown ? "hideDetails" : "showDetails"), "aria-label": t(shown ? "hideDetails" : "showDetails"), "aria-pressed": String(!shown),
+    onclick: () => UN.saveSettings({ showDetails: !shown }) }, svg(shown ? ICONS.eye : ICONS.eyeOff));
   const gear = h("button", { class: "icon-btn", title: t("settings"), "aria-label": t("settings"), onclick: () => { browser.runtime.openOptionsPage(); window.close(); } }, svg(ICONS.settings));
   return h("header", null,
     h("img", { class: "logo", src: "../icons/icon.svg", alt: "" }),
     h("h1", null, "UniNotify"),
     total ? h("span", { class: "total", title: t("unreadCount", [String(total)]) }, String(total)) : null,
     h("span", { class: "spacer" }),
+    eye,
     refresh,
     gear);
 }
@@ -36,7 +39,7 @@ function renderAccount(acc) {
   const pref = settings.accounts[acc.id] || {};
   const label = UN.accountLabel(acc, settings);
   const sub = label !== acc.email && acc.email ? acc.email : PROVIDERS[acc.provider].name;
-  const msgs = acc.messages.slice(0, MAX_MSGS);
+  const msgs = settings.showDetails === false ? [] : acc.messages.slice(0, Number(settings.listCount) || 0);
 
   return h("section", { class: "account" },
     h("button", { class: "account-head", onclick: () => open(acc.id), title: t("openInbox") },
@@ -44,20 +47,27 @@ function renderAccount(acc) {
       h("span", { class: "who" }, h("div", { class: "label" }, label), h("div", { class: "sub" }, sub)),
       pref.muted ? h("span", { class: "muted-icon", title: t("muted") }, svg(ICONS.muted, 16)) : null,
       h("span", { class: "count" + (acc.unread ? "" : " zero") }, String(acc.unread))),
-    msgs.length
+    acc.error
+      ? h("div", { class: "notice" }, svg(ICONS.warn, 16), h("span", null, t("msReconnectNeeded")),
+          h("button", { onclick: () => { browser.runtime.openOptionsPage(); window.close(); } }, t("msReconnect")))
+      : msgs.length
       ? h("ul", { class: "msgs" },
           msgs.map((m) => h("li", null,
-            h("button", { class: "msg", onclick: () => open(acc.id, m.url), title: m.snippet || m.subject },
+            h("button", { class: "msg", onclick: () => open(acc.id, m.url), title: settings.listSubject ? m.snippet || m.subject : "" },
               h("span", { class: "from" }, m.from || "—"),
               h("span", { class: "time" }, UN.relTime(m.time)),
-              h("span", { class: "subject" }, m.subject || t("noSubject"))))),
-          acc.unread > msgs.length ? h("li", { class: "more" }, t("moreUnread", [String(acc.unread - msgs.length)])) : null)
+              settings.listSubject ? h("span", { class: "subject" }, m.subject || t("noSubject")) : null))),
+          acc.unread > msgs.length
+            ? h("li", null, h("button", { class: "more", onclick: () => open(acc.id) }, t("moreUnread", [String(acc.unread - msgs.length)])))
+            : null)
       : null);
 }
 
 function renderProviderNotice(id, info) {
   const code = info.granted === false ? "permission" : info.error;
-  const action = code === "signed_out"
+  const action = code === "signed_out" && id === "outlook"
+    ? h("button", { onclick: () => { browser.runtime.openOptionsPage(); window.close(); } }, t("msConnectShort"))
+    : code === "signed_out"
     ? h("button", { onclick: () => { browser.tabs.create({ url: PROVIDERS[id].loginUrl }); window.close(); } }, t("signIn"))
     : code === "permission"
       ? h("button", { onclick: () => { browser.runtime.openOptionsPage(); window.close(); } }, t("grant"))
@@ -65,7 +75,7 @@ function renderProviderNotice(id, info) {
   return h("section", { class: "account" },
     h("div", { class: "account-head", style: "cursor:default" },
       avatar(id),
-      h("span", { class: "who" }, h("div", { class: "label" }, PROVIDERS[id].name), h("div", { class: "sub" }, errorText(code)))),
+      h("span", { class: "who" }, h("div", { class: "label" }, PROVIDERS[id].name))),
     h("div", { class: "notice" }, svg(ICONS.warn, 16), h("span", null, errorText(code)), action));
 }
 

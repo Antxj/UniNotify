@@ -22,16 +22,19 @@
       }
     }
   },
-  "permissions": ["alarms", "storage", "notifications"],
+  "permissions": ["alarms", "storage", "notifications", "scripting", "identity"],
   "optional_permissions": ["cookies"],
   "optional_host_permissions": [
     "https://mail.google.com/*",
     "https://outlook.live.com/*",
+    "https://graph.microsoft.com/*",
+    "https://login.microsoftonline.com/*",
     "https://mail.proton.me/*"
   ],
   "background": {
     "scripts": [
       "lib/common.js",
+      "lib/msauth.js",
       "providers/gmail.js",
       "providers/outlook.js",
       "providers/proton.js",
@@ -48,6 +51,6 @@
     "open_in_tab": true
   },
   "content_security_policy": {
-    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://mail.google.com https://outlook.live.com https://mail.proton.me; object-src 'none'; base-uri 'none'; form-action 'none'"
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://mail.google.com https://graph.microsoft.com https://login.microsoftonline.com https://mail.proton.me; object-src 'none'; base-uri 'none'; form-action 'none'"
   }
 }

@@ -21,12 +21,12 @@ async function save(patch, quiet) {
 // ---------- general settings ----------
 
 function bindGeneral() {
-  const fields = { interval: "value", theme: "value", notify: "checked", preview: "checked", sound: "checked", dnd: "checked", dndFrom: "value", dndTo: "value" };
+  const fields = { interval: "value", listCount: "value", listSubject: "checked", theme: "value", notify: "checked", preview: "checked", sound: "checked", dnd: "checked", dndFrom: "value", dndTo: "value" };
   for (const [key, prop] of Object.entries(fields)) {
     const el = $(key);
-    el[prop] = settings[key];
+    el[prop] = prop === "value" ? String(settings[key]) : settings[key];
     el.addEventListener("change", () => {
-      const v = key === "interval" ? Number(el.value) : el[prop];
+      const v = key === "interval" || key === "listCount" ? Number(el.value) : el[prop];
       save({ [key]: v });
       if (key === "theme") UN.applyTheme(v);
     });
@@ -45,6 +45,11 @@ async function toggleProvider(id, on) {
     await save({ providers: { ...settings.providers, [id]: true } });
   } else {
     await save({ providers: { ...settings.providers, [id]: false } });
+    // Turning Outlook off also forgets its Microsoft sign-ins on this computer.
+    if (id === "outlook") {
+      await browser.storage.local.remove("msAccounts");
+      await browser.storage.session.remove("msTokens");
+    }
     // Give the access back: we don't keep permissions we no longer need.
     // Only drop "cookies" if no other enabled provider still uses it.
     const stillNeeded = new Set(Object.keys(PROVIDERS).filter((k) => settings.providers[k]).flatMap((k) => PROVIDERS[k].permissions));
@@ -62,6 +67,24 @@ async function grant(id) {
   }
 }
 
+// ---------- Outlook (Microsoft sign-in) ----------
+
+async function connectOutlook() {
+  try {
+    const email = await UN.ms.connect();
+    toast(t("msConnected", [email]));
+    browser.runtime.sendMessage({ type: "check" });
+  } catch (e) {
+    console.warn("UniNotify: Microsoft sign-in failed:", e.message);
+    toast(t("msConnectFailed"));
+  }
+}
+
+async function disconnectOutlook(email) {
+  await UN.ms.removeAccount(email);
+  browser.runtime.sendMessage({ type: "check" });
+}
+
 function statusLine(id) {
   const enabled = settings.providers[id];
   const info = state.providers?.[id];
@@ -70,12 +93,15 @@ function statusLine(id) {
   if (!granted[id])
     return h("div", { class: "status warn" }, h("span", { class: "dot" }), t("errPermission"),
       h("button", { class: "linklike", onclick: () => grant(id) }, t("grant")));
-  if (info?.error === "signed_out")
+  if (id === "outlook" && info?.error === "signed_out" && !accs.length)
+    return h("div", { class: "status warn" }, h("span", { class: "dot" }), t("msNoAccount"));
+  if (info?.error === "signed_out" && id !== "outlook")
     return h("div", { class: "status warn" }, h("span", { class: "dot" }), t("errSignedOut"),
       h("a", { href: PROVIDERS[id].loginUrl, target: "_blank", rel: "noopener noreferrer" }, t("signIn")));
   if (info?.error)
     return h("div", { class: "status warn", title: info.detail || "" }, h("span", { class: "dot" }),
       t({ offline: "errOffline", network: "errNetwork" }[info.error] || "errUnexpected"));
+  if (accs.some((a) => a.error)) return h("div", { class: "status warn" }, h("span", { class: "dot" }), t("msReconnectNeeded"));
   if (accs.length) return h("div", { class: "status ok" }, h("span", { class: "dot" }), t("statusConnected", [String(accs.length)]));
   return h("div", { class: "status" }, h("span", { class: "dot" }), t("checking"));
 }
@@ -93,7 +119,9 @@ function accountRow(acc) {
     h("div", null,
       h("input", { type: "text", value: pref.alias || "", placeholder: acc.email || acc.name || "", maxlength: "40", "aria-label": t("alias"),
         oninput: (e) => { clearTimeout(aliasTimer); aliasTimer = setTimeout(() => update({ alias: e.target.value.trim() }), 500); } }),
-      h("div", { class: "email" }, acc.email)),
+      h("div", { class: "email" }, acc.email,
+        acc.provider === "outlook" && acc.error ? [" · ", h("button", { class: "linklike", onclick: connectOutlook }, t("msReconnect"))] : null,
+        acc.provider === "outlook" ? [" · ", h("button", { class: "linklike", onclick: () => disconnectOutlook(acc.email) }, t("msDisconnect"))] : null)),
     h("div", { class: "toggles" },
       h("label", null, h("input", { type: "checkbox", class: "switch", checked: !!pref.muted, onchange: (e) => update({ muted: e.target.checked }) }), t("mute")),
       h("label", null, h("input", { type: "checkbox", class: "switch", checked: !!pref.hidden, onchange: (e) => update({ hidden: e.target.checked }) }), t("hide"))));
@@ -110,7 +138,10 @@ function renderProviders() {
         h("span", { class: "avatar", style: `background:${p.color}`, "aria-hidden": "true" }, p.letter),
         h("div", { class: "info" }, h("div", { class: "name" }, p.name), statusLine(id)),
         sw),
-      settings.providers[id] && accs.length ? h("div", { class: "acc-list" }, accs.map(accountRow)) : null);
+      settings.providers[id] && accs.length ? h("div", { class: "acc-list" }, accs.map(accountRow)) : null,
+      id === "outlook" && settings.providers[id] && granted[id]
+        ? h("div", { class: "acc-actions" }, h("button", { class: "btn small", onclick: connectOutlook }, t("msConnect")))
+        : null);
   });
   $("providers").replaceChildren(...list);
 }

@@ -83,7 +83,18 @@ header .spacer { flex: 1; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.more { padding: 4px 12px 8px 52px; color: var(--accent); font-weight: 600; font-size: 12px; }
+.more {
+  width: 100%;
+  padding: 4px 12px 8px 52px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12px;
+}
+.more:hover { text-decoration: underline; }
 
 .notice {
   display: flex;
