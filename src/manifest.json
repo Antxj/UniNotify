@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "short_name": "UniNotify",
+  "version": "1.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
+  "homepage_url": "https://github.com/Antxj/UniNotify",
+  "icons": {
+    "16": "icons/icon.svg",
+    "32": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "uninotify@antxj",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "permissions": ["alarms", "storage", "notifications"],
+  "optional_permissions": ["cookies"],
+  "optional_host_permissions": [
+    "https://mail.google.com/*",
+    "https://outlook.live.com/*",
+    "https://mail.proton.me/*"
+  ],
+  "background": {
+    "scripts": [
+      "lib/common.js",
+      "providers/gmail.js",
+      "providers/outlook.js",
+      "providers/proton.js",
+      "background/background.js"
+    ]
+  },
+  "action": {
+    "default_title": "UniNotify",
+    "default_popup": "popup/popup.html",
+    "default_icon": "icons/icon.svg"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://mail.google.com https://outlook.live.com https://mail.proton.me; object-src 'none'; base-uri 'none'; form-action 'none'"
+  }
+}

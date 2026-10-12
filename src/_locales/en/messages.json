@@ -1,0 +1,158 @@
+{
+  "extName": {
+    "message": "UniNotify"
+  },
+  "extDescription": {
+    "message": "Unread mail from Gmail, Outlook.com, Hotmail and Proton Mail in one place. Private by design: no telemetry, no passwords."
+  },
+  "unreadCount": {
+    "message": "$1 unread"
+  },
+  "notifNewOne": {
+    "message": "New mail · $1"
+  },
+  "notifNewMany": {
+    "message": "$1 new messages · $2"
+  },
+  "notifOpenHint": {
+    "message": "Click to open your inbox."
+  },
+  "refresh": {
+    "message": "Check now"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "openInbox": {
+    "message": "Open inbox"
+  },
+  "muted": {
+    "message": "Notifications muted"
+  },
+  "noSubject": {
+    "message": "(no subject)"
+  },
+  "moreUnread": {
+    "message": "+$1 more unread"
+  },
+  "signIn": {
+    "message": "Sign in"
+  },
+  "grant": {
+    "message": "Allow access"
+  },
+  "errSignedOut": {
+    "message": "Signed out"
+  },
+  "errOffline": {
+    "message": "You're offline"
+  },
+  "errNetwork": {
+    "message": "Couldn't connect — will retry"
+  },
+  "errPermission": {
+    "message": "Needs access on this device"
+  },
+  "errUnexpected": {
+    "message": "Unexpected response — will retry"
+  },
+  "emptyTitle": {
+    "message": "All your inboxes, one button"
+  },
+  "emptyBody": {
+    "message": "Turn on Gmail, Outlook.com/Hotmail or Proton Mail to start."
+  },
+  "addAccounts": {
+    "message": "Add accounts"
+  },
+  "checking": {
+    "message": "Checking…"
+  },
+  "noMail": {
+    "message": "No accounts found yet."
+  },
+  "lastChecked": {
+    "message": "Checked $1"
+  },
+  "noTelemetry": {
+    "message": "No telemetry"
+  },
+  "saved": {
+    "message": "Saved"
+  },
+  "statusOff": {
+    "message": "Off"
+  },
+  "statusConnected": {
+    "message": "Connected · $1 account(s)"
+  },
+  "color": {
+    "message": "Color"
+  },
+  "alias": {
+    "message": "Display name"
+  },
+  "mute": {
+    "message": "Mute"
+  },
+  "hide": {
+    "message": "Hide"
+  },
+  "accountsTitle": {
+    "message": "Mail accounts"
+  },
+  "accountsHint": {
+    "message": "Sign in to your webmail in Firefox as usual. UniNotify finds your accounts automatically — it never asks for or stores passwords."
+  },
+  "generalTitle": {
+    "message": "General"
+  },
+  "interval": {
+    "message": "Check for new mail every"
+  },
+  "theme": {
+    "message": "Appearance"
+  },
+  "themeAuto": {
+    "message": "Match Firefox"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "notify": {
+    "message": "Desktop notifications"
+  },
+  "preview": {
+    "message": "Show sender and subject in notifications"
+  },
+  "sound": {
+    "message": "Notification sound"
+  },
+  "test": {
+    "message": "Test"
+  },
+  "dnd": {
+    "message": "Quiet hours"
+  },
+  "privacyTitle": {
+    "message": "Your privacy"
+  },
+  "privacy1": {
+    "message": "No telemetry, analytics or tracking of any kind. UniNotify has no servers."
+  },
+  "privacy2": {
+    "message": "It only talks to Google, Microsoft and Proton — and only for the services you turn on."
+  },
+  "privacy3": {
+    "message": "Your mail stays in memory and is cleared when Firefox closes. Nothing is written to disk or synced."
+  },
+  "privacy4": {
+    "message": "Only your preferences sync through your Firefox Account."
+  },
+  "sourceCode": {
+    "message": "Open source on GitHub"
+  }
+}

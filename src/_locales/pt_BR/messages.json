@@ -1,0 +1,158 @@
+{
+  "extName": {
+    "message": "UniNotify"
+  },
+  "extDescription": {
+    "message": "E-mails não lidos do Gmail, Outlook.com, Hotmail e Proton Mail em um só lugar. Privado por padrão: sem telemetria, sem senhas."
+  },
+  "unreadCount": {
+    "message": "$1 não lidos"
+  },
+  "notifNewOne": {
+    "message": "Novo e-mail · $1"
+  },
+  "notifNewMany": {
+    "message": "$1 novos e-mails · $2"
+  },
+  "notifOpenHint": {
+    "message": "Clique para abrir a caixa de entrada."
+  },
+  "refresh": {
+    "message": "Verificar agora"
+  },
+  "settings": {
+    "message": "Configurações"
+  },
+  "openInbox": {
+    "message": "Abrir caixa de entrada"
+  },
+  "muted": {
+    "message": "Notificações silenciadas"
+  },
+  "noSubject": {
+    "message": "(sem assunto)"
+  },
+  "moreUnread": {
+    "message": "+$1 não lidos"
+  },
+  "signIn": {
+    "message": "Entrar"
+  },
+  "grant": {
+    "message": "Permitir acesso"
+  },
+  "errSignedOut": {
+    "message": "Sessão encerrada"
+  },
+  "errOffline": {
+    "message": "Você está offline"
+  },
+  "errNetwork": {
+    "message": "Não foi possível conectar — tentando novamente"
+  },
+  "errPermission": {
+    "message": "Precisa de permissão neste dispositivo"
+  },
+  "errUnexpected": {
+    "message": "Resposta inesperada — tentando novamente"
+  },
+  "emptyTitle": {
+    "message": "Todas as suas caixas, um só botão"
+  },
+  "emptyBody": {
+    "message": "Ative Gmail, Outlook.com/Hotmail ou Proton Mail para começar."
+  },
+  "addAccounts": {
+    "message": "Adicionar contas"
+  },
+  "checking": {
+    "message": "Verificando…"
+  },
+  "noMail": {
+    "message": "Nenhuma conta encontrada ainda."
+  },
+  "lastChecked": {
+    "message": "Verificado $1"
+  },
+  "noTelemetry": {
+    "message": "Sem telemetria"
+  },
+  "saved": {
+    "message": "Salvo"
+  },
+  "statusOff": {
+    "message": "Desativado"
+  },
+  "statusConnected": {
+    "message": "Conectado · $1 conta(s)"
+  },
+  "color": {
+    "message": "Cor"
+  },
+  "alias": {
+    "message": "Nome de exibição"
+  },
+  "mute": {
+    "message": "Silenciar"
+  },
+  "hide": {
+    "message": "Ocultar"
+  },
+  "accountsTitle": {
+    "message": "Contas de e-mail"
+  },
+  "accountsHint": {
+    "message": "Entre no seu webmail no Firefox normalmente. O UniNotify encontra suas contas sozinho — ele nunca pede nem guarda senhas."
+  },
+  "generalTitle": {
+    "message": "Geral"
+  },
+  "interval": {
+    "message": "Verificar novos e-mails a cada"
+  },
+  "theme": {
+    "message": "Aparência"
+  },
+  "themeAuto": {
+    "message": "Igual ao Firefox"
+  },
+  "themeLight": {
+    "message": "Claro"
+  },
+  "themeDark": {
+    "message": "Escuro"
+  },
+  "notify": {
+    "message": "Notificações na área de trabalho"
+  },
+  "preview": {
+    "message": "Mostrar remetente e assunto nas notificações"
+  },
+  "sound": {
+    "message": "Som de notificação"
+  },
+  "test": {
+    "message": "Testar"
+  },
+  "dnd": {
+    "message": "Horário silencioso"
+  },
+  "privacyTitle": {
+    "message": "Sua privacidade"
+  },
+  "privacy1": {
+    "message": "Sem telemetria, análises ou rastreamento de qualquer tipo. O UniNotify não tem servidores."
+  },
+  "privacy2": {
+    "message": "Ele só se comunica com Google, Microsoft e Proton — e apenas com os serviços que você ativar."
+  },
+  "privacy3": {
+    "message": "Seus e-mails ficam só na memória e são apagados quando o Firefox fecha. Nada é gravado em disco nem sincronizado."
+  },
+  "privacy4": {
+    "message": "Apenas suas preferências são sincronizadas pela sua Conta Firefox."
+  },
+  "sourceCode": {
+    "message": "Código aberto no GitHub"
+  }
+}

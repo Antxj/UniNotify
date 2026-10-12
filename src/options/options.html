@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UniNotify</title>
+  <link rel="icon" href="../icons/icon.svg">
+  <link rel="stylesheet" href="../lib/theme.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <img src="../icons/icon.svg" alt="" width="40" height="40">
+      <div>
+        <h1>UniNotify</h1>
+        <p class="tagline" data-i18n="extDescription"></p>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2 data-i18n="accountsTitle"></h2>
+      <p class="hint" data-i18n="accountsHint"></p>
+      <div id="providers"></div>
+    </section>
+
+    <section class="panel">
+      <h2 data-i18n="generalTitle"></h2>
+
+      <div class="row">
+        <label for="interval" data-i18n="interval"></label>
+        <select id="interval">
+          <option value="1">1 min</option>
+          <option value="2">2 min</option>
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="15">15 min</option>
+          <option value="30">30 min</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="theme" data-i18n="theme"></label>
+        <select id="theme">
+          <option value="auto" data-i18n="themeAuto"></option>
+          <option value="light" data-i18n="themeLight"></option>
+          <option value="dark" data-i18n="themeDark"></option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="notify" data-i18n="notify"></label>
+        <input type="checkbox" class="switch" id="notify">
+      </div>
+      <div class="row">
+        <label for="preview" data-i18n="preview"></label>
+        <input type="checkbox" class="switch" id="preview">
+      </div>
+      <div class="row">
+        <label for="sound" data-i18n="sound"></label>
+        <span class="inline">
+          <button class="btn small" id="testSound" type="button" data-i18n="test"></button>
+          <input type="checkbox" class="switch" id="sound">
+        </span>
+      </div>
+      <div class="row">
+        <label for="dnd" data-i18n="dnd"></label>
+        <span class="inline">
+          <input type="time" id="dndFrom" aria-label="From">
+          <span>–</span>
+          <input type="time" id="dndTo" aria-label="To">
+          <input type="checkbox" class="switch" id="dnd">
+        </span>
+      </div>
+    </section>
+
+    <section class="panel privacy">
+      <h2 data-i18n="privacyTitle"></h2>
+      <ul>
+        <li data-i18n="privacy1"></li>
+        <li data-i18n="privacy2"></li>
+        <li data-i18n="privacy3"></li>
+        <li data-i18n="privacy4"></li>
+      </ul>
+    </section>
+
+    <footer>
+      <span id="version"></span>
+      <a href="https://github.com/Antxj/UniNotify" target="_blank" rel="noopener noreferrer" data-i18n="sourceCode"></a>
+    </footer>
+  </div>
+  <div id="toast" role="status"></div>
+  <script src="../lib/common.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

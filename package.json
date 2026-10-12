@@ -1,0 +1,17 @@
+{
+  "name": "uninotify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Development tooling for the UniNotify Firefox extension. The extension itself has no runtime dependencies.",
+  "license": "MPL-2.0",
+  "scripts": {
+    "lint": "web-ext lint --source-dir src",
+    "build": "web-ext build --source-dir src --artifacts-dir dist --overwrite-dest",
+    "start": "web-ext run --source-dir src",
+    "icons": "node tools/icons.mjs",
+    "screens": "node tools/screens.mjs"
+  },
+  "devDependencies": {
+    "web-ext": "^8.3.0"
+  }
+}
