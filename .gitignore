@@ -3,3 +3,4 @@ dist/
 .tmp/
 *.xpi
 .tmp-*
+.amo-upload-uuid
