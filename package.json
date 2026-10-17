@@ -1,6 +1,6 @@
 {
   "name": "uninotify",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Development tooling for the UniNotify Firefox extension. The extension itself has no runtime dependencies.",
   "license": "MPL-2.0",
