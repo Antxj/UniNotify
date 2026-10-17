@@ -9,10 +9,11 @@
   INBOX: "0", // Proton's label id for the inbox
 
   async check(signal) {
-    // Each signed-in Proton session has an "AUTH-<UID>" cookie. We only read the
-    // cookie *name* to learn the session id; its value is never touched.
+    // Each signed-in Proton session has "AUTH-<UID>" (short-lived access) and
+    // "REFRESH-<UID>" cookies. We only read cookie *names* to learn the session
+    // ids; their values are never touched.
     const cookies = await browser.cookies.getAll({ domain: "mail.proton.me", firstPartyDomain: null });
-    const uids = [...new Set(cookies.filter((c) => c.name.startsWith("AUTH-")).map((c) => c.name.slice(5)))];
+    const uids = [...new Set(cookies.map((c) => /^(?:AUTH|REFRESH)-([\w-]+)$/.exec(c.name)?.[1]).filter(Boolean))];
     if (!uids.length) throw UN.providerError("signed_out");
 
     const appVersion = await this.appVersion(signal);
@@ -35,10 +36,11 @@
     return accounts;
   },
 
-  async api(path, uid, appVersion, signal) {
+  async api(path, uid, appVersion, signal, method = "GET") {
     let res;
     try {
       res = await fetch(this.API + path, {
+        method,
         credentials: "include",
         cache: "no-store",
         headers: { "x-pm-uid": uid, "x-pm-appversion": appVersion, accept: "application/vnd.protonmail.v1+json" },
@@ -49,6 +51,7 @@
       throw UN.providerError("network");
     }
     if (res.status === 401 || res.status === 403) throw UN.providerError("signed_out");
+    if (res.status === 400 || res.status === 422) throw UN.providerError("unexpected", `HTTP ${res.status}`);
     let body;
     try {
       body = await res.json();
@@ -59,9 +62,30 @@
     return body;
   },
 
+  // Proton's access cookie is short-lived; its web app renews it with the
+  // refresh cookie. We do the same when it has expired, so the session stays
+  // usable even when no Proton tab is open. Proton then sets fresh cookies.
+  async refreshSession(uid, appVersion, signal) {
+    try {
+      await this.api("/auth/refresh", uid, appVersion, signal, "POST");
+    } catch (e) {
+      if (e.name === "AbortError") throw e;
+      // 400/401/422 mean the session really ended; anything else is transient.
+      throw e.code === "signed_out" || /code (400|422)|HTTP (400|422)/.test(e.message) ? UN.providerError("signed_out") : e;
+    }
+  },
+
   async checkSession(uid, appVersion, signal) {
-    const [user, mailSettings, counts, list] = await Promise.all([
-      this.api("/core/v4/users", uid, appVersion, signal),
+    // One call first, so an expired access token is refreshed only once.
+    let user;
+    try {
+      user = await this.api("/core/v4/users", uid, appVersion, signal);
+    } catch (e) {
+      if (e.code !== "signed_out") throw e;
+      await this.refreshSession(uid, appVersion, signal);
+      user = await this.api("/core/v4/users", uid, appVersion, signal);
+    }
+    const [mailSettings, counts, list] = await Promise.all([
       this.api("/mail/v4/settings", uid, appVersion, signal),
       this.api("/mail/v4/messages/count", uid, appVersion, signal),
       this.api(`/mail/v4/messages?LabelID=${this.INBOX}&Unread=1&Page=0&PageSize=20&Sort=Time&Desc=1`, uid, appVersion, signal)

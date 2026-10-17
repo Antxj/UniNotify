@@ -43,7 +43,7 @@ UN.DEFAULTS = Object.freeze({
   preview: true, // show sender & subject in notifications
   listCount: 3, // emails listed per account in the popup (0 = counts only)
   listSubject: true, // show subjects in the popup
-  showDetails: true, // popup eye toggle: list emails, or show counts only
+  showDetails: false, // popup eye toggle (privacy mode on by default): list emails, or show counts only
   dnd: false,
   dndFrom: "22:00",
   dndTo: "07:00",
